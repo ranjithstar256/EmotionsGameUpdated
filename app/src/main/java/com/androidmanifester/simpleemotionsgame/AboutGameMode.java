@@ -13,7 +13,7 @@ public class AboutGameMode extends AppCompatActivity {
         setContentView(R.layout.activity_about_game_mode);
     }
 
-    public void gotogame(View view) {
+    public void gotogamee(View view) {
         startActivity(new Intent(AboutGameMode.this, SelectWordActivity.class));
     }
 }

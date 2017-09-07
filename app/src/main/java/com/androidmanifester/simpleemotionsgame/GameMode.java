@@ -1,170 +1,142 @@
 package com.androidmanifester.simpleemotionsgame;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class GameMode extends AppCompatActivity {
-    ArrayList<String> words;
-    ArrayList<String> Happy;
-    ArrayList<String> Sad;
-    ArrayList<String> Good;
-    ArrayList<String> Bad;
-    ArrayList<String> Weird;
-    ArrayList<String> All;
+    ArrayList<String> words, Happy, Sad, Good, Bad, Weird, All;
     ArrayList<Integer> BalloonColor;
-    ArrayList<TextView> tvs;
-
-    int height, width;
-    TextView tv1, tv2, tv4, tv5, tv6, tv13, tv8, tv9, tv10, tv11, tv12;
-
-    TextView tvscore;
+    LinkedList<TextView> tvlist;
+    int height, width, score;
+    TextView tv0, tv1, tv2, tv3, tv4, tv5, tv6, tv7, tv8, tvscore, tvcount;
     String SelectedWord;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
-    int score;
-    Animation animatn;
-    ToggleButton toggleButton;
-    ImageView imageView;
     private SoundHelper mSoundHelper;
-    private Toast toast;
-    private long lastBackPressTime = 0;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSoundHelper.stopMusic();
+        editor.putInt("asdfaf", 0).commit();
+        Log.d("abcdeonpause", "" + sharedPreferences.getInt("COUNT", 0));
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         setContentView(R.layout.activity_main);
-
-
         if (((getIntent().getIntExtra("ori", 1)) == 1)) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
-
-        //  setRequestedOrientation(Integer.parseInt(getIntent().getStringExtra("ori")));
-
-
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
         mSoundHelper = new SoundHelper(this);
-
         mSoundHelper.prepareMusicPlayer(this);
         mSoundHelper.playMusic();
-        animatn = AnimationUtils.loadAnimation(GameMode.this, R.anim.explode);
-
-        tv1 = (TextView) findViewById(R.id.textView);
+        tv0 = (TextView) findViewById(R.id.textView0);
+        tv1 = (TextView) findViewById(R.id.textView1);
         tv2 = (TextView) findViewById(R.id.textView2);
+        tv3 = (TextView) findViewById(R.id.textView3);
         tv4 = (TextView) findViewById(R.id.textView4);
         tv5 = (TextView) findViewById(R.id.textView5);
         tv6 = (TextView) findViewById(R.id.textView6);
+        tv7 = (TextView) findViewById(R.id.textView7);
         tv8 = (TextView) findViewById(R.id.textView8);
-        tv9 = (TextView) findViewById(R.id.textView9);
-        tv10 = (TextView) findViewById(R.id.textView10);
-        tv11 = (TextView) findViewById(R.id.textView11);
-        tv12 = (TextView) findViewById(R.id.textView12);
-        tv13 = (TextView) findViewById(R.id.textView13);
+        tvcount = (TextView) findViewById(R.id.tvcountid);
+        tvscore = (TextView) findViewById(R.id.tvscoreid);
+
         sharedPreferences = getSharedPreferences("sfname", MODE_PRIVATE);
         editor = sharedPreferences.edit();
-        tvscore = (TextView) findViewById(R.id.textView3);
-        score = 0;
         SelectedWord = sharedPreferences.getString("selectedword", "None");
-
+        words = new ArrayList<String>();
+        tvlist = new LinkedList<TextView>();
+        BalloonColor = new ArrayList<Integer>();
+        All = new ArrayList<String>();
+        Weird = new ArrayList<String>();
+        Bad = new ArrayList<String>();
         Happy = new ArrayList<String>();
         Sad = new ArrayList<String>();
         Good = new ArrayList<String>();
-        Bad = new ArrayList<String>();
-        Weird = new ArrayList<String>();
-        All = new ArrayList<String>();
-        BalloonColor = new ArrayList<Integer>();
-
-        tvs = new ArrayList<TextView>();
-        words = new ArrayList<String>();
         words.add("Happy");
         words.add("Sad");
         words.add("Good");
         words.add("Bad");
         words.add("Weird");
 
+        tvlist.add(tv0);
+        tvlist.add(tv1);
+        tvlist.add(tv2);
+        tvlist.add(tv3);
+        tvlist.add(tv4);
+        tvlist.add(tv5);
+        tvlist.add(tv6);
+        tvlist.add(tv7);
+        tvlist.add(tv8);
 
-        tvs.add(tv1);
-        tvs.add(tv2);
-        tvs.add(tv4);
-        tvs.add(tv5);
-        tvs.add(tv6);
-        tvs.add(tv6);
-        tvs.add(tv8);
-        tvs.add(tv9);
-        tvs.add(tv10);
-        tvs.add(tv11);
-        tvs.add(tv12);
-        tvs.add(tv13);
-
-        //contented, content, cheerful, cheery, merry, joyful
         Happy.add("Contented");
         Happy.add("Cheerful");
         Happy.add("Cheery");
         Happy.add("Merry");
         Happy.add("Joyful");
-        //	unhappy, sorrowful, dejected, regretful, depressed, downcast,
+
+
         Sad.add("unhappy");
         Sad.add("Sorrowful");
         Sad.add("Dejected");
         Sad.add("Regretful");
         Sad.add("Depressed");
-        //	fine, of high quality, of a high standard, quality, superior
         Good.add("Fine");
         Good.add("Of high quality");
         Good.add("Of a high standard");
         Good.add("Quality");
         Good.add("Superior");
-        //	substandard, poor, inferior, second-rate, second-class, unsatisfactory, inadequate, unacceptable,
-        // not up to scratch, not up to par,
-        // deficient, imperfect, defective, faulty, shoddy, amateurish, careless, negligent
+
         Bad.add("Poor");
         Bad.add("Imperfect");
         Bad.add("Defective");
         Bad.add("Faulty");
         Bad.add("Substandard");
-        //	uncanny, eerie, unnatural, preternatural, supernatural, unearthly,
-        // other-worldly, unreal, ghostly, mysterious
         Weird.add("Mysterious");
         Weird.add("Supernatural");
         Weird.add("Unearthly");
@@ -202,101 +174,140 @@ public class GameMode extends AppCompatActivity {
         BalloonColor.add(R.drawable.balloon_red);
         BalloonColor.add(R.drawable.balloon_yellow);
 
-        startgame();
 
         final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+
+        final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                //Do something after 100ms
-                startgame();
-            }
-        }, 1500);
+                //Collections.shuffle(tvlist, new Random(System.nanoTime()));
+                Collections.shuffle(BalloonColor, new Random(System.nanoTime()));
+                Collections.shuffle(All, new Random(System.nanoTime()));
 
-        final Handler handler2 = new Handler();
-        handler2.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //Do something after 100ms
-                startgame();
-            }
-        }, 2800);
-        final Handler handler3 = new Handler();
-        handler3.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //Do something after 100ms
-                startgame();
-            }
-        }, 3450);
-        //startgame();
-    }
+                int u = sharedPreferences.getInt("asdfaf", 0);//0
+                if (u < tvlist.size()) {
+                    // Collections.shuffle(tvlist, new Random(System.nanoTime()));
+                    tvlist.get(u).setGravity(Gravity.CENTER);//0
+                    tvlist.get(u).setBackgroundResource(BalloonColor.get(0));//0
+                    animat(tvlist.get(u), All.get(0), sharedPreferences.getInt("ge", 7));//0
 
-    @Override
-    public void onBackPressed() {
+                    u = ++u + (++u);
+                    editor.putInt("asdfaf", u).commit();//1
 
-        ///  finish();
-        // System.exit(0);
-        new MaterialDialog.Builder(this)
-                .title("Confirm Exit")
-                .content("Are You Sure?")
-                .positiveText("Exit")
-                .negativeText("Cancel")
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
+
+                } else {
+                    editor.putInt("asdfaf", 0).commit();
+                    Collections.shuffle(tvlist, new Random(System.nanoTime()));
+                    tvlist.get(2).setBackgroundResource(BalloonColor.get(0));
+                    tvlist.get(2).setGravity(Gravity.CENTER);
+                    animat(tvlist.get(2), All.get(0), sharedPreferences.getInt("ge", 6));
+                }
+
+      /* and here comes the "trick" */
+                handler.postDelayed(this, 1000);
+            }
+        };
+
+        handler.postDelayed(runnable, 100);
+
+
+//        final Timer t2 = new Timer();
+//        t2.scheduleAtFixedRate(new TimerTask() {
+//                                   @Override
+//                                   public void run() {
+//                                       runOnUiThread(new Runnable() {
+//                                           @Override
+//                                           public void run() {
+//
+//                                           }
+//                                       });
+//                                   }
+//                               },//Set how long before to start calling the TimerTask (in milliseconds)
+//                0,//Set the amount of time between each execution (in milliseconds)
+//                2000);
+
+        new CountDownTimer(120000, 1000) {
+            public void onTick(long millisUntilFinished) {
+                tvcount.setText("" + millisUntilFinished / 1000);
+            }
+
+            public void onFinish() {
+                tvcount.setText("Time's Up!");
+                handler.removeCallbacks(runnable);
+
+                AlertDialog.Builder dialog = new AlertDialog.Builder(GameMode.this);
+                dialog.setMessage("Time's Up!" + "" +
+                        "\n" + "Your Score " + tvscore.getText().toString());
+                dialog.setIcon(R.drawable.happy);
+                dialog.setTitle("Good Job!");
+                dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        finish();
-                        mSoundHelper.stopMusic();
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(GameMode.this, GameSummary.class).putExtra("scr", "Your Score " + tvscore.getText().toString()));
                     }
-                })
-                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
+                });
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        }.start();
     }
 
-    public void startgame() {
-        Timer t2 = new Timer();
-//Set the schedule function and rate
-        t2.scheduleAtFixedRate(new TimerTask() {
 
-                                   @Override
-                                   public void run() {
-//Called each time when 4000 milliseconds (4 second) (the period parameter)
-                                       runOnUiThread(new Runnable() {
-                                           @Override
-                                           public void run() {
-//stuff that updates ui
-                                               Collections.shuffle(tvs, new Random(System.nanoTime()));
-                                               tvs.get(0).setGravity(Gravity.CENTER);
-                                               Collections.shuffle(BalloonColor, new Random(System.nanoTime()));
-                                               tvs.get(0).setBackgroundResource(BalloonColor.get(0));
-                                               Collections.shuffle(All, new Random(System.nanoTime()));
-                                               animat(tvs.get(0), All.get(0));
-                                           }
-                                       });
-                                   }
-                               },//Set how long before to start calling the TimerTask (in milliseconds)
-                0,//Set the amount of time between each execution (in milliseconds)
-                4000);
-    }
+    public void animat(final TextView t, final String v, int z) {
+        // if(z==7){
 
-    public void animat(final TextView t, String v) {
+        // } else {
         final ObjectAnimator mover = ObjectAnimator.ofFloat(t, "translationY", 0, -height);
 
-        mover.setDuration(5000);
-        //mover.clone();
-        //mover.setRepeatCount(0);
-        if (mover.isRunning()) {
+        switch (sharedPreferences.getInt("skilevel", 1)) {
 
-        } else {
-            t.setText(v);
-            // t.setWidth(100);
-            mover.start();
+            case 0:
+                mover.setDuration(10000);
+                break;
+            case 1:
+                mover.setDuration(10000);
+                break;
+            case 2:
+                mover.setDuration(10000);
+                break;
+            case 3:
+                mover.setDuration(10000);
+                break;
+            case 4:
+                mover.setDuration(10000);
+                break;
+            case 5:
+                mover.setDuration(10000);
+                break;
+            default:
+                mover.setDuration(10000);
+                break;
         }
+            t.setText(v);
+            mover.start();
+        mover.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                editor.putInt("ge", 7).commit();
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                editor.putInt("ge", 6).commit();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
         t.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -326,21 +337,17 @@ public class GameMode extends AppCompatActivity {
                     score = score + 10;
                     tvscore.setText(score + "");
                     mSoundHelper.playSound(t, 0);
-                    //mover.cancel();
                     mover.end();
-                    //t.startAnimation(animatn);
                 } else {
                     score = score - 10;
                     tvscore.setText(score + "");
                     mSoundHelper.playSound(t, 1);
-//                  mover.cancel();
                     mover.end();
-                    //t.startAnimation(animatn);
                 }
                 t.setClickable(false);
-                /// Toast.makeText(getApplicationContext(), "is "+state, Toast.LENGTH_SHORT).show();
             }
         });
+        //}
     }
 
     @Override
@@ -374,6 +381,32 @@ public class GameMode extends AppCompatActivity {
         dialog.show();
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed() {
+        mSoundHelper.stopMusic();
+
+        new MaterialDialog.Builder(this)
+                .title("Confirm Exit")
+                .content("Are You Sure?")
+                .positiveText("Exit")
+                .negativeText("Cancel")
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        finish();
+                        mSoundHelper.stopMusic();
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                        mSoundHelper.playMusic();
+                    }
+                })
+                .show();
+    }
 //
 //    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 //        super.onCreateContextMenu(menu, v, menuInfo);
@@ -396,4 +429,74 @@ public class GameMode extends AppCompatActivity {
 //                return super.onContextItemSelected(item);
 //        }
 //    }
+
+
+    // int f = sharedPreferences.getInt("it",0);
+    //    Log.d("abcdet1enternce",""+sharedPreferences.getInt("COUNT",0));
+    //  if(sharedPreferences.getInt("COUNT",0)<tvs.size()){
+    // tvs.get(sharedPreferences.getInt("COUNT",0)).setGravity(Gravity.CENTER);
+    // tvs.get(sharedPreferences.getInt("COUNT",0)).setBackgroundResource(BalloonColor.get(0));
+    //Collections.shuffle(BalloonColor, new Random(System.nanoTime()));
+    // tvs.get(now).setGravity(Gravity.CENTER);
+    // tvs.get(now).setBackgroundResource(BalloonColor.get(0));
+    // Collections.shuffle(All, new Random(System.nanoTime()));
+    ///og.d("abcdeanimating numer",""+sharedPreferences.getInt("COUNT",0));
+
+    //animat(tvs.get(sharedPreferences.getInt("COUNT",0)), All.get(0));
+    // int nr=sharedPreferences.getInt("COUNT",0)+1;
+    //    Log.d("abcdeadded+1?",""+nr);
+
+    //   editor.putInt("COUNT",nr).commit();
+    //   int cv=tvs.size()-1;
+    //  Log.d("abcdecv size",""+cv);
+
+    // if(nr==cv){
+
+    //      Collections.shuffle(tvs, new Random(System.nanoTime()));
+    //   editor.putInt("COUNT",0).commit();
+    //       Log.d("abcdechanged?",""+sharedPreferences.getInt("COUNT",0));
+
+    //  }
+    //  }
+    //  else {
+    //      Collections.shuffle(tvs, new Random(System.nanoTime()));
+    ////      editor.putInt("COUNT",0).commit();
+    //      Log.d("abcderesetted?",""+sharedPreferences.getInt("COUNT",0));
+
+    //animat(tvs.get(sharedPreferences.getInt("chnAis",0)), All.get(0));
+    //  }
+    ///if (!mover.isRunning()){
+    ///  Toast.makeText(this, "runing", Toast.LENGTH_SHORT).show();
+    ///}else {}
+    /// //                    case 0:
+//                        mover.setDuration(10000);
+//                        break;
+//                    case 1:
+//                        mover.setDuration(9000);
+//                        break;
+//                    case 2:
+//                        mover.setDuration(8000);
+//                        break;
+//                    case 3:
+//                        mover.setDuration(7000);
+//                        break;
+//                    case 4:
+//                        mover.setDuration(6000);
+//                        break;
+//                    case 5:
+//                        mover.setDuration(5000);
+//                        break;
+//                    default:
+//                        mover.setDuration(5000);
+//                        break;
+    //	unhappy, sorrowful,
+    // dejected, regretful, depressed, downcast,
+    //contented, content, cheerful,
+    // cheery, merry, joyful
+    //	fine, of high quality, of a high standard, quality, superior
+    //	substandard, poor, inferior, second-rate, second-class, unsatisfactory, inadequate, unacceptable,
+    // not up to scratch, not up to par,
+    // deficient, imperfect, defective, faulty, shoddy, amateurish, careless, negligent
+    //	uncanny, eerie, unnatural, preternatural, supernatural, unearthly,
+    // other-worldly, unreal, ghostly, mysterious
 }

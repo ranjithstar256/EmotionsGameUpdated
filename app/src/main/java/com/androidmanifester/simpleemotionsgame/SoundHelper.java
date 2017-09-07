@@ -14,7 +14,7 @@ public class SoundHelper {
 
     private MediaPlayer musicPlayer;
     private SoundPool mSoundPool;
-    private int mSoundID,mSoundID2;
+    private int mSoundID, mSoundID2;
     private boolean mLoaded;
     private float mVolume;
 
@@ -49,11 +49,11 @@ public class SoundHelper {
         mSoundID2 = mSoundPool.load(activity, R.raw.no, 1);
     }
 
-    public void playSound(View v,int mode) {
+    public void playSound(View v, int mode) {
 
         // Is the sound loaded does it already play?
         if (mLoaded) {
-            if (mode==1){
+            if (mode == 1) {
                 mSoundPool.play(mSoundID2, mVolume, mVolume, 1, 0, 1f);
             } else {
                 mSoundPool.play(mSoundID, mVolume, mVolume, 1, 0, 1f);

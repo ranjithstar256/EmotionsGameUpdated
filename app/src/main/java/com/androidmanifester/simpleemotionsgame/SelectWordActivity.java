@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -28,7 +29,7 @@ public class SelectWordActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     ToggleButton toggleButton;
-    ImageView  imageView;
+    ImageView imageView;
 
     int orientatn;
     Integer[] imageId = {
@@ -44,30 +45,30 @@ public class SelectWordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_word);
-        sharedPreferences=getSharedPreferences("sfname",MODE_PRIVATE);
-        orientatn=1;
-        editor=sharedPreferences.edit();
-        words=new ArrayList<String>();
+        sharedPreferences = getSharedPreferences("sfname", MODE_PRIVATE);
+        orientatn = 1;
+        editor = sharedPreferences.edit();
+        words = new ArrayList<String>();
         words.add("Happy");
         words.add("Sad");
         words.add("Good");
         words.add("Bad");
         words.add("Weird");
-        listView=(ListView) findViewById(R.id.listv);
+        listView = (ListView) findViewById(R.id.listv);
 
 
         CustomList adapter = new
                 CustomList(SelectWordActivity.this, words, imageId);
 
-     ///   arrayAdapter=new ArrayAdapter<String>(SelectWordActivity.this,android.R.layout.simple_list_item_1,words);
+        ///   arrayAdapter=new ArrayAdapter<String>(SelectWordActivity.this,android.R.layout.simple_list_item_1,words);
         //listView.setAdapter(arrayAdapter);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SelectedWord=words.get(position);
-                editor.putString("selectedword",SelectedWord).commit();
+                SelectedWord = words.get(position);
+                editor.putString("selectedword", SelectedWord).commit();
 
                 new MaterialDialog.Builder(SelectWordActivity.this)
                         .title("Select Orientation")
@@ -82,23 +83,37 @@ public class SelectWordActivity extends AppCompatActivity {
                         .contentColorRes(android.R.color.white)
                         .iconRes(R.drawable.cool_blu)
                         .maxIconSize(50)
-                      //  .backgroundColorRes(R.color.material_blue_grey_800)
+                        //  .backgroundColorRes(R.color.material_blue_grey_800)
                         .dividerColorRes(R.color.accent)
-                       // .btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
+                        // .btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
                         .positiveColor(Color.WHITE)
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                orientatn=1;
-                                startActivity(new Intent(SelectWordActivity.this, GameMode.class).putExtra("ori", orientatn));
-
+                                orientatn = 1;
+                                Toast.makeText(SelectWordActivity.this, "g", Toast.LENGTH_SHORT).show();
+                                switch (sharedPreferences.getString("mode", "Game")) {
+                                    case "Game":
+                                        startActivity(new Intent(SelectWordActivity.this, GameMode.class).putExtra("ori", orientatn));
+                                        break;
+                                    case "Learning":
+                                        startActivity(new Intent(SelectWordActivity.this, LearningMode.class).putExtra("ori", orientatn));
+                                        break;
+                                }
                             }
                         })
                         .onNegative(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                orientatn=0;
-                                startActivity(new Intent(SelectWordActivity.this, GameMode.class).putExtra("ori", orientatn));
+                                orientatn = 0;
+                                switch (sharedPreferences.getString("mode", "Game")) {
+                                    case "Game":
+                                        startActivity(new Intent(SelectWordActivity.this, GameMode.class).putExtra("ori", orientatn));
+                                        break;
+                                    case "Learning":
+                                        startActivity(new Intent(SelectWordActivity.this, LearningMode.class).putExtra("ori", orientatn));
+                                        break;
+                                }
 
                             }
                         })
